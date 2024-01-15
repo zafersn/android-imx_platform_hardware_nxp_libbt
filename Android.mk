@@ -93,6 +93,9 @@ endif
 ifeq ($(TARGET_PRODUCT), evk_93)
     include $(LOCAL_PATH)/conf/nxp/evk_93/Android.mk
 endif
+ifeq ($(TARGET_PRODUCT), evk_95)
+    include $(LOCAL_PATH)/conf/nxp/evk_95/Android.mk
+endif
 ifeq ($(TARGET_PRODUCT),$(filter $(TARGET_PRODUCT),mek_8q mek_8q_car mek_8q_car2))
     include $(LOCAL_PATH)/conf/nxp/mek_8q/Android.mk
 endif
