@@ -46,10 +46,10 @@
 
 /*============================ Function Prototypes ===========================*/
 
-extern BOOLEAN fw_upload_lenValid(uint16* uiLenToSend, uint8* ucArray);
+extern bool fw_upload_lenValid(uint16* uiLenToSend, uint8* ucArray);
 extern uint16 fw_upload_GetDataLen(uint8* buf);
-extern int32 fw_upload_ComReadChar(int32 mchar_fd);
-extern void fw_upload_ComWriteChar(int32 mchar_fd, int8 iChar);
+extern uint8 fw_upload_ComReadChar(int32 mchar_fd);
+extern void fw_upload_ComWriteChar(int32 mchar_fd, uint8 iChar);
 extern void fw_upload_ComWriteChars(int32 mchar_fd, uint8* pChBuffer,
                                     uint32 uiLen);
 extern void fw_upload_ComReadChars(int32 mchar_fd, uint8* pChBuffer,

@@ -43,14 +43,11 @@
 
 /*================================== Macros ==================================*/
 
-#define BT_HAL_VERSION "009.022"
+#define BT_HAL_VERSION "009.024"
 
 #define TIMEOUT_SEC 6
 #define RW_SUCCESSFUL (1)
 #define RW_FAILURE (~RW_SUCCESSFUL)
-
-#define TRUE 1
-#define FALSE 0
 
 #define DOWNLOAD_SUCCESS 0x0
 #define OPEN_SERIAL_PORT_OR_FILE_ERROR 0x1
@@ -62,7 +59,6 @@
 #define CHANGE_TIMEOUT_VALUE_FAIL 0x7
 #define OPEN_FILE_FAIL 0x8
 #define FILE_MODE_CANNOT_CHANGE 0X9
-#define UNEXPECTED_BEHAVIOUR_IN_SETJMP 0xA
 #define MALLOC_RETURNED_NULL 0xB
 #define START_INDICATION_NOT_FOUND 0xC
 #define INVALID_LEN_TO_SEND 0xD
@@ -72,15 +68,15 @@
 #define BT_SET_SLEEP_MODE 0x02
 #define BT_SET_FULL_POWER_MODE 0x03
 
-#define HCI_CMD_INBAND_RESET 0xFCFC
-#define HCI_CMD_NXP_RESET 0x0C03
-#define HCI_CMD_NXP_CHANGE_BAUDRATE 0xFC09
-#define HCI_CMD_NXP_BLE_WAKEUP 0xFD52
+#define HCI_CMD_INBAND_RESET 0xFCFCU
+#define HCI_CMD_NXP_RESET 0x0C03U
+#define HCI_CMD_NXP_CHANGE_BAUDRATE 0xFC09U
+#define HCI_CMD_NXP_BLE_WAKEUP 0xFD52U
 #define HCI_CMD_OTT_SUB_WAKEUP_EXIT_HEARTBEATS 0x08
 
-#define WRITE_BD_ADDRESS_SIZE 8
-#define MAX_PATH_LEN 512
-#define MAX_DEVICE_LEN 32
+#define WRITE_BD_ADDRESS_SIZE 8U
+#define MAX_PATH_LEN 512UL
+#define MAX_DEVICE_LEN 32U
 #define MAX_FILE_LEN 128
 
 #define HCI_EVENT_PAYLOAD_SIZE 255
@@ -88,18 +84,19 @@
 
 /* BLUETOOTH CORE SPECIFICATION Version 5.4*/
 /*(Volume 4, Part A, 2) | 1 byte HCI packet type*/
-#define HCI_PACKET_TYPE_SIZE 1
+#define HCI_PACKET_TYPE_SIZE 1U
 /*(Volume 4,Part E, 5.4.4) 1 byte Event Code, 1 byte Parameter Total Length */
-#define HCI_EVENT_HEADER_SIZE 2
+#define HCI_EVENT_HEADER_SIZE 2U
 /*(Volume 4, Part E, 5.4.1) | 2 bytes Opcode, 1 byte Parameter Total Length */
-#define HCI_COMMAND_HEADER_SIZE 3
+#define HCI_COMMAND_HEADER_SIZE 3U
 
 #define NXP_WAKEUP_ADV_PATTERN_LENGTH 16  // company id + vendor information
 #define PROP_BLUETOOTH_INIT_ATTEMPTED "bluetooth.nxp.init_attempted"
 #define PROP_VENDOR_TRIGGER_PDN "vendor.nxp.trigger_pdn"
 #define PDN_RECOVERY_THRESHOLD (2)
 #define PROP_BLUETOOTH_FW_DOWNLOADED "bluetooth.nxp.fw_downloaded"
-#define PROP_BLUETOOTH_INBAND_CONFIGURED "bluetooth.nxp.inband_ir_configured"
+#define PROP_BLUETOOTH_INBAND_CONFIGURED ("bluetooth.nxp.inband_ir_configured")
+
 #define PROP_BLUETOOTH_BOOT_SLEEP_TRIGGER \
   "bluetooth.nxp.sent_boot_sleep_triggered"
 /* Run-time configuration file */
@@ -146,7 +143,6 @@ typedef unsigned char uint8;
 typedef int int32;
 typedef short int16;
 typedef char int8;
-typedef unsigned char BOOLEAN;
 
 enum { IR_TRIGGER_NONE, IR_TRIGGER_RFKILL, IR_TRIGGER_GPIO };
 enum { IR_MODE_NONE, IR_MODE_OOB_VSC, IR_MODE_INBAND_VSC };
@@ -182,7 +178,7 @@ typedef union {
     uint8_t packet_type;
     uint8_t event_type;
     uint8_t para_len;
-    uint8_t payload[];
+    uint8_t payload[HCI_EVENT_PAYLOAD_SIZE];
   } info;
 } hci_event;
 /*================================ Global Vars================================*/
@@ -191,17 +187,17 @@ extern unsigned char* bdaddr;
 extern int write_bdaddrss;
 extern uint8_t write_bd_address[WRITE_BD_ADDRESS_SIZE];
 extern const bt_vendor_callbacks_t* vnd_cb;
-extern char pFilename_cal_data[MAX_PATH_LEN];
+extern char pFilename_cal_data[];
 extern int8_t ble_1m_power;
 extern int8_t ble_2m_power;
-extern int8_t bt_max_power_sel;
+extern uint8_t bt_max_power_sel;
 extern uint8_t set_1m_2m_power;
 extern uint8_t bt_set_max_power;
 extern uint8_t independent_reset_mode;
 extern uint8_t independent_reset_gpio_pin;
 extern bool enable_sco_config;
 extern bool use_controller_addr;
-extern char pFilename_fw_init_config_bin[MAX_PATH_LEN];
+extern char pFilename_fw_init_config_bin[];
 extern bool enable_heartbeat_config;
 extern bool enable_pdn_recovery;
 extern wakeup_gpio_config_t wakeup_gpio_config[wakeup_key_num];
@@ -211,7 +207,7 @@ extern wakeup_local_param_config_t wakeup_local_param_config;
 extern bool lpm_configured;
 extern int mchar_fd;
 extern bool wakeup_enable_uart_low_config;
-int8 hw_bt_configure_lpm(uint8 sleep_mode);
+int hw_bt_configure_lpm(uint8 sleep_mode);
 void wakeup_kill_heartbeat_thread(void);
 #ifdef UART_DOWNLOAD_FW
 extern uint8_t enable_poke_controller;
@@ -220,7 +216,7 @@ extern uint8_t enable_poke_controller;
 /*============================ Function Prototypes ===========================*/
 
 void hw_config_start(void);
-int32 init_uart(int8* dev, int32 dwBaudRate, uint8 ucFlowCtrl);
+int32 init_uart(int8* dev, uint32 dwBaudRate, uint8 ucFlowCtrl);
 int get_prop_int32(const char* name);
 void set_prop_int32(const char* name, int value);
 int8 hw_bt_send_wakeup_disable_raw(void);

@@ -33,17 +33,17 @@
 
 /*================================ Global Vars================================*/
 
-extern int vhal_trace_level;
+extern uint32_t vhal_trace_level;
 
 /*================================== Typedefs=================================*/
 
 /*================================== Macros ==================================*/
-#define BT_TRACE_LEVEL_NONE 0    /* No trace messages to be generated    */
-#define BT_TRACE_LEVEL_ERROR 1   /* Error condition trace messages       */
-#define BT_TRACE_LEVEL_WARNING 2 /* Warning condition trace messages     */
-#define BT_TRACE_LEVEL_INFO 3    /* Generic Info                         */
-#define BT_TRACE_LEVEL_DEBUG 4   /* Debug messages for events            */
-#define BT_TRACE_LEVEL_VERBOSE 5 /* Full debug messages                  */
+#define BT_TRACE_LEVEL_NONE 0U    /* No trace messages to be generated    */
+#define BT_TRACE_LEVEL_ERROR 1U   /* Error condition trace messages       */
+#define BT_TRACE_LEVEL_WARNING 2U /* Warning condition trace messages     */
+#define BT_TRACE_LEVEL_INFO 3U    /* Generic Info                         */
+#define BT_TRACE_LEVEL_DEBUG 4U   /* Debug messages for events            */
+#define BT_TRACE_LEVEL_VERBOSE 5U /* Full debug messages                  */
 
 #if (BT_TRACE_LEVEL_ERROR <= VHAL_LOG_LEVEL)
 #define VND_LOGE(fmt, ...)                                           \

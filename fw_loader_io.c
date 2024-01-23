@@ -66,20 +66,20 @@
  *
 
 *****************************************************************************/
-BOOLEAN fw_upload_lenValid(uint16* uiLenToSend, uint8* ucArray) {
+bool fw_upload_lenValid(uint16* uiLenToSend, uint8* ucArray) {
   uint16 uiLen, uiLenComp;
   uint16 uiXorOfLen = 0xFFFF;
-  uiLen = ((ucArray[1] & 0xFF) | ((ucArray[2] << 8) & 0xFF00));
-  uiLenComp = ((ucArray[3] & 0xFF) | ((ucArray[4] << 8) & 0xFF00));
+  uiLen = (uint16)((ucArray[1] & 0xFF) | ((ucArray[2] << 8) & 0xFF00));
+  uiLenComp = (uint16)((ucArray[3] & 0xFF) | ((ucArray[4] << 8) & 0xFF00));
   // LEN valid if len & complement match
   if ((uiLen ^ uiLenComp) == uiXorOfLen)  // All 1's
   {
     *uiLenToSend = uiLen;
-    return TRUE;
+    return true;
   } else {
     VND_LOGE("Length and complement check failed uiLen = %d uiLenComp = %d",
              uiLen, uiLenComp);
-    return FALSE;
+    return false;
   }
 }
 
@@ -136,9 +136,9 @@ void fw_upload_DelayInMs(uint32 uiMs) {
 
   // Calculate the Delay
   sec = (int)(uiMs / 1000);
-  uiMs = uiMs - (sec * 1000);
+  uiMs = uiMs - ((uint32)(sec * 1000));
   ReqTime.tv_sec = sec;
-  ReqTime.tv_nsec = uiMs * 1000000L;  // 1 ms = 1000000 ns
+  ReqTime.tv_nsec = (long)(uiMs * 1000000L);  // 1 ms = 1000000 ns
 
   // Sleep
   while (nanosleep(&ReqTime, &ReqTime) == -1) {
@@ -157,7 +157,7 @@ void fw_upload_DelayInMs(uint32 uiMs) {
  *   None.
  *
  * Arguments:
- *   nPortID : Port ID.
+ *   fd : Port ID.
  *
  * Return Value:
  *   Returns the character, if Successful.
@@ -167,15 +167,16 @@ void fw_upload_DelayInMs(uint32 uiMs) {
  *   None.
  *
  *****************************************************************************/
-int32 fw_upload_ComReadChar(int32 mchar_fd) {
+uint8 fw_upload_ComReadChar(int32 fd) {
   int32 iResult = 0;
-  uint8 ucNumCharToRead = 1;
-  int32 ret =0;
-  if (read(mchar_fd, &iResult, ucNumCharToRead) == ucNumCharToRead) {
-    ret = (iResult & 0xFF);
+  size_t ucNumCharToRead = 1;
+  uint8 ret = 0;
+
+  if (read(fd, &iResult, ucNumCharToRead) == (ssize_t)ucNumCharToRead) {
+    ret = (uint8)(iResult & 0xFF);
   } else {
     //  VND_LOGV("Read error: %s (%d)", strerror(errno), errno);
-    ret = RW_FAILURE;
+    ret = 0;
   }
   return ret;
 }
@@ -191,7 +192,7 @@ int32 fw_upload_ComReadChar(int32 mchar_fd) {
  *   None.
  *
  * Arguments:
- *   mchar_fd   : Port ID.
+ *   fd   : Port ID.
  *   pBuffer : Destination buffer for the characters read
  *   iCount    : Number of Characters to be read.
  *
@@ -203,8 +204,8 @@ int32 fw_upload_ComReadChar(int32 mchar_fd) {
  *   None.
  *
  *****************************************************************************/
-void fw_upload_ComReadChars(int32 mchar_fd, uint8* pBuffer, uint32 uiCount) {
-  if ((uint32)read(mchar_fd, pBuffer, uiCount) != uiCount) {
+void fw_upload_ComReadChars(int32 fd, uint8* pBuffer, uint32 uiCount) {
+  if (read(fd, pBuffer, uiCount) != (ssize_t)uiCount) {
     VND_LOGV("Read error: %s (%d)", strerror(errno), errno);
   }
   return;
@@ -215,27 +216,27 @@ void fw_upload_ComReadChars(int32 mchar_fd, uint8* pBuffer, uint32 uiCount) {
  * Name: fw_upload_ComWriteChar
  *
  * Description:
- *   Write a character to the port specified by mchar_fd.
+ *   Write a character to the port specified by fd.
  *
  * Conditions For Use:
  *   None.
  *
  * Arguments:
- *   mchar_fd : Port ID.
+ *   fd : Port ID.
  *   iChar   : Character to be written
  *
  * Return Value:
- *   Returns TRUE, if write is Successful.
- *   Returns FALSE if write is a failure.
+ *   Returns true, if write is Successful.
+ *   Returns false if write is a failure.
  *
  * Notes:
  *   None.
  *
  *****************************************************************************/
-void fw_upload_ComWriteChar(int32 mchar_fd, int8 iChar) {
-  uint8 ucNumCharToWrite = 1;
+void fw_upload_ComWriteChar(int32 fd, uint8 iChar) {
+  ssize_t ucNumCharToWrite = 1;
 
-  if (write(mchar_fd, &iChar, ucNumCharToWrite) != ucNumCharToWrite) {
+  if (write(fd, &iChar, (size_t)ucNumCharToWrite) != ucNumCharToWrite) {
     VND_LOGE("Write error: %s (%d)", strerror(errno), errno);
   }
   return;
@@ -246,26 +247,26 @@ void fw_upload_ComWriteChar(int32 mchar_fd, int8 iChar) {
  * Name: fw_upload_ComWriteChars
  *
  * Description:
- *   Write iLen characters to the port specified by mchar_fd.
+ *   Write iLen characters to the port specified by fd.
  *
  * Conditions For Use:
  *   None.
  *
  * Arguments:
- *   mchar_fd : Port ID.
+ *   fd : Port ID.
  *   pBuffer : Buffer where characters are available to be written to the Port.
  *   iLen    : Number of Characters to write.
  *
  * Return Value:
- *   Returns TRUE, if write is Successful.
- *   Returns FALSE if write is a failure.
+ *   Returns true, if write is Successful.
+ *   Returns false if write is a failure.
  *
  * Notes:
  *   None.
  *
  *****************************************************************************/
-void fw_upload_ComWriteChars(int32 mchar_fd, uint8* pBuffer, uint32 uiLen) {
-  if ((uint32)write(mchar_fd, pBuffer, uiLen) != uiLen) {
+void fw_upload_ComWriteChars(int32 fd, uint8* pBuffer, uint32 uiLen) {
+  if (write(fd, pBuffer, uiLen) != (ssize_t)uiLen) {
     VND_LOGE("Write error: %s (%d)", strerror(errno), errno);
   }
   return;
@@ -289,9 +290,9 @@ void fw_upload_ComWriteChars(int32 mchar_fd, uint8* pBuffer, uint32 uiLen) {
  *   None.
  *
  *****************************************************************************/
-int32 fw_upload_ComGetCTS(int32 mchar_fd) {
+int32 fw_upload_ComGetCTS(int32 fd) {
   int32 status;
-  if (ioctl(mchar_fd, TIOCMGET, &status) < 0) {
+  if (ioctl(fd, TIOCMGET, &status) < 0) {
     VND_LOGE("ioctl error: %s (%d)", strerror(errno), errno);
   }
   if (status & TIOCM_CTS) {
@@ -311,7 +312,7 @@ int32 fw_upload_ComGetCTS(int32 mchar_fd) {
  *   None.
  *
  * Arguments:
- *   mchar_fd
+ *   fd
  *
  * Return Value:
  *   size in buffer
@@ -320,9 +321,9 @@ int32 fw_upload_ComGetCTS(int32 mchar_fd) {
  *   None.
  *
  *****************************************************************************/
-uint32 fw_upload_GetBufferSize(int32 mchar_fd) {
+uint32 fw_upload_GetBufferSize(int32 fd) {
   uint32 bytes = 0;
-  if (ioctl(mchar_fd, FIONREAD, &bytes) < 0) {
+  if (ioctl(fd, FIONREAD, &bytes) < 0) {
     VND_LOGE("ioctl error: %s (%d)", strerror(errno), errno);
   }
   return bytes;

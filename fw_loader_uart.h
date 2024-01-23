@@ -47,8 +47,8 @@ extern uint8_t independent_reset_mode;
 /*============================ Function Prototypes ===========================*/
 
 void init_crc8(void);
-BOOLEAN bt_vnd_mrvl_check_fw_status(void);
-int bt_vnd_mrvl_download_fw(int8* pPortName, int32 iBaudRate, int8* pFileName,
-                            int32 iSecondBaudRate);
+bool bt_vnd_mrvl_check_fw_status(void);
+uint32 bt_vnd_mrvl_download_fw(int8* pPortName, uint32 iBaudRate,
+                               int8* pFileName, uint32 iSecondBaudRate);
 void fw_loader_get_default_fw_name(char fw_name[], uint32 fw_name_size);
 #endif  // FW_LOADER_H

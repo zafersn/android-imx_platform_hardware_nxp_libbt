@@ -1,12 +1,22 @@
 # Change Log
 All notable changes in Bluetooth Vendor Hardware Abstraction Layer(BT VHAL) will be documented in this file.
 
-## [009.022] - 23-October-20
+## [009.024] - 2024-January-04
+
+### Fixed
+- Fixed Code sonar warnings
+
+## [009.023] - 2023-November-09
+
+### Fixed
+- CRC error seen during firmware download
+
+## [009.022] - 2023-October-20
 
 ### Fixed
 - Fixed Code Sonar warnings
 
-## [009.021] - 23-September-01
+## [009.021] - 2023-September-01
 
 ### Fixed
 - Correction of typos

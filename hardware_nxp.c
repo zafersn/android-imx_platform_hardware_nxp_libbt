@@ -46,26 +46,25 @@
 #define MSG_STACK_TO_HC_HCI_CMD 0x2000 /* eq. BT_EVT_TO_LM_HCI_CMD */
 #define BT_HC_HDR_SIZE (sizeof(HC_BT_HDR))
 
-#define HCI_CMD_NXP_WRITE_VOICE_SETTINGS 0x0C26
-#define HCI_CMD_NXP_WRITE_PCM_SETTINGS 0xFC07
-#define HCI_CMD_NXP_WRITE_PCM_SYNC_SETTINGS 0xFC28
-#define HCI_CMD_NXP_WRITE_PCM_LINK_SETTINGS 0xFC29
-#define HCI_CMD_NXP_SET_SCO_DATA_PATH 0xFC1D
+#define HCI_CMD_NXP_WRITE_VOICE_SETTINGS 0x0C26U
+#define HCI_CMD_NXP_WRITE_PCM_SETTINGS 0xFC07U
+#define HCI_CMD_NXP_WRITE_PCM_SYNC_SETTINGS 0xFC28U
+#define HCI_CMD_NXP_WRITE_PCM_LINK_SETTINGS 0xFC29U
+#define HCI_CMD_NXP_SET_SCO_DATA_PATH 0xFC1DU
 
-#define WRITE_VOICE_SETTINGS_SIZE 2
-#define WRITE_PCM_SETTINGS_SIZE 1
-#define WRITE_PCM_SYNC_SETTINGS_SIZE 3
-#define WRITE_PCM_LINK_SETTINGS_SIZE 2
-#define SET_SCO_DATA_PATH_SIZE 1
+#define WRITE_VOICE_SETTINGS_SIZE 2U
+#define WRITE_PCM_SETTINGS_SIZE 1U
+#define WRITE_PCM_SYNC_SETTINGS_SIZE 3U
+#define WRITE_PCM_LINK_SETTINGS_SIZE 2U
+#define SET_SCO_DATA_PATH_SIZE 1U
 
-#define HCI_CMD_NXP_WRITE_BD_ADDRESS 0xFC22
-#define HCI_BT_SET_EVENTMASK_OCF 0x0001
+#define HCI_CMD_NXP_WRITE_BD_ADDRESS 0xFC22U
+#define HCI_BT_SET_EVENTMASK_OCF 0x0001U
 
-#define HCI_DISABLE_PAGE_SCAN_OCF 0x001a
-#define HCI_READ_LOCAL_BDADDR 0x1009
+#define HCI_DISABLE_PAGE_SCAN_OCF 0x001aU
+#define HCI_READ_LOCAL_BDADDR 0x1009U
 
-#define WRITE_BD_ADDRESS_SIZE 8
-#define HCI_CMD_PREAMBLE_SIZE 3
+#define HCI_CMD_PREAMBLE_SIZE 3U
 #define HCI_EVT_CMD_CMPL_OPCODE 3
 
 #define IS_SAME_MEM(src, val, size) \
@@ -78,7 +77,7 @@
    IS_SAME_MEM(src, 0x41, BD_ADDR_LEN) || \
    IS_SAME_MEM(src, 0x88, BD_ADDR_LEN) || IS_SAME_MEM(src, 0x99, BD_ADDR_LEN))
 
-#define WRITE_BD_ADDRESS_SIZE 8
+#define WRITE_BD_ADDRESS_SIZE 8U
 #define HCI_EVT_CMD_CMPL_LOCAL_BDADDR_ARRAY 6
 #define BD_ADDR_LEN 6
 #define HCI_CMD_NXP_LOAD_CONFIG_DATA 0xFC61
@@ -189,7 +188,7 @@ static pthread_cond_t cond_wakeup = PTHREAD_COND_INITIALIZER;
 static pthread_t p_headtbeat;
 static bool heartbeat_event_received = false;
 static unsigned char wakeup_gpio_config_state = wakeup_key_num;
-static bool send_heartbeat = FALSE;
+static bool send_heartbeat = false;
 static uint8_t wake_gpio_config = 0;
 
 /*============================== Coded Procedures ============================*/
@@ -430,7 +429,7 @@ static void hw_sco_config_cb(void* p_mem) {
 
   if (p_buf) {
     VND_LOGD("Sending hci command 0x%04hX (%s)", cmd, hw_bt_cmd_to_str(cmd));
-    if (vnd_cb->xmit_cb(cmd, p_buf, hw_sco_config_cb))
+    if (vnd_cb->xmit_cb(cmd, p_buf, hw_sco_config_cb) == true)
       return;
     else
       vnd_cb->dealloc(p_buf);
@@ -465,7 +464,7 @@ static int8 hw_sco_config(void) {
 
     if (p_buf) {
       VND_LOGD("Sending hci command 0x%04hX (%s)", cmd, hw_bt_cmd_to_str(cmd));
-      if (vnd_cb->xmit_cb(cmd, p_buf, hw_sco_config_cb))
+      if (vnd_cb->xmit_cb(cmd, p_buf, hw_sco_config_cb) == true)
         return 0;
       else
         vnd_cb->dealloc(p_buf);
@@ -497,7 +496,7 @@ static HC_BT_HDR* make_command(uint16_t opcode, size_t parameter_size) {
   packet->event = 0;
   packet->offset = 0;
   packet->layer_specific = 0;
-  packet->len = HCI_COMMAND_HEADER_SIZE + parameter_size;
+  packet->len = (uint16_t)(HCI_COMMAND_HEADER_SIZE + parameter_size);
   UINT16_TO_STREAM(stream, opcode);
   UINT8_TO_STREAM(stream, parameter_size);
   return packet;
@@ -515,7 +514,7 @@ static HC_BT_HDR* make_command(uint16_t opcode, size_t parameter_size) {
 
 static uint8_t* make_command_raw(uint16_t opcode, uint8_t parameter_size,
                                  uint8_t* size) {
-  uint8_t *packet, *ptr;
+  uint8_t* packet, *ptr;
   uint8_t pkt_size =
       HCI_PACKET_TYPE_SIZE + HCI_COMMAND_HEADER_SIZE + parameter_size;
   packet = (uint8_t*)malloc(pkt_size);
@@ -543,13 +542,13 @@ static uint8_t* make_command_raw(uint16_t opcode, uint8_t parameter_size,
 **
 *******************************************************************************/
 static void hw_config_process_packet(void* packet) {
-  uint8_t *stream, event, event_code, status, opcode_offset;
+  uint8_t* stream, event, event_code, status, opcode_offset;
   uint16_t opcode, len;
   char* p_tmp;
   if (packet != NULL) {
     HC_BT_HDR* p_evt_buf = (HC_BT_HDR*)packet;
     stream = ((HC_BT_HDR*)packet)->data;
-    event = ((HC_BT_HDR*)packet)->event;
+    event = (uint8_t)(((HC_BT_HDR*)packet)->event);
     len = ((HC_BT_HDR*)packet)->len;
     opcode_offset = HCI_EVENT_HEADER_SIZE + HCI_PACKET_TYPE_SIZE;
     VND_LOGD("Packet length %d", len);
@@ -616,13 +615,13 @@ static void hw_config_process_packet(void* packet) {
           } break;
           case HCI_CMD_NXP_BLE_WAKEUP: {
             if (status != 0) {
-              enable_heartbeat_config = FALSE;
+              enable_heartbeat_config = false;
             }
             wakeup_event_handler(stream[opcode_offset + 3]);
           } break;
           case HCI_CMD_NXP_SET_BT_SLEEP_MODE: {
             if (status == 0) {
-              lpm_configured = TRUE;
+              lpm_configured = true;
             }
           } break;
           default:
@@ -662,7 +661,7 @@ static void hw_config_seq(void* packet) {
     VND_LOGI("FW config completed!");
     if (vnd_cb) {
       vnd_cb->fwcfg_cb(BT_VND_OP_RESULT_SUCCESS);
-      if (enable_heartbeat_config == TRUE) {
+      if (enable_heartbeat_config == true) {
         int status;
         status =
             pthread_create(&p_headtbeat, NULL, send_heartbeat_thread, NULL);
@@ -762,7 +761,7 @@ void hw_config_start(void) {
   hw_config.skip_seq_incr = 0;
   hw_config.size = sizeof(hw_config_seq_arr) / sizeof(hw_config_seq_arr[0]);
   hw_config.seq_arr = hw_config_seq_arr;
-  if (enable_heartbeat_config == TRUE) {
+  if (enable_heartbeat_config == true) {
     wake_gpio_config = 0;
   }
   hw_config_seq(NULL);
@@ -830,7 +829,7 @@ static int hw_bt_load_cal_file(const char* cal_file_name, uint8_t* cal_data,
       VND_LOGE("%s cal_file size too big", __func__);
       goto done;
     }
-    cal_data[data_len++] = (unsigned char)data;
+    cal_data[data_len++] = (uint8_t)(data);
   }
   if (data_len == BT_CONFIG_DATA_SIZE) {
     *cal_data_size = data_len;
@@ -902,7 +901,7 @@ static int8 hw_ble_send_power_level_cmd(uint8_t phy_level, int8_t power_level) {
     stream = &packet->data[HCI_COMMAND_HEADER_SIZE];
     stream[0] = HCI_CMD_NXP_SUB_ID_BLE_TX_POWER;
     stream[1] = phy_level;
-    stream[2] = power_level;
+    stream[2] = (uint8_t)power_level;
     ret = hw_bt_send_packet(packet, opcode, hw_config_seq);
   }
   return ret;
@@ -1023,11 +1022,11 @@ static int8 hw_bt_enable_independent_reset(void) {
  ** Return Value:  0 if success, -1 otherwise
  **
  *****************************************************************************/
-int8 hw_bt_configure_lpm(uint8 sleep_mode) {
+int hw_bt_configure_lpm(uint8 sleep_mode) {
   uint16_t opcode;
   HC_BT_HDR* packet;
   uint8_t* stream;
-  int8 ret = -1;
+  int ret = -1;
   opcode = HCI_CMD_NXP_SET_BT_SLEEP_MODE;
   packet = make_command(opcode, HCI_CMD_NXP_SET_BT_SLEEP_MODE_SIZE);
   if (packet) {
@@ -1069,11 +1068,12 @@ static void* send_heartbeat_thread(void* data) {
   HC_BT_HDR* packet;
   (void)data;
 
-  send_heartbeat = TRUE;
+  send_heartbeat = true;
   VND_LOGD("Starting Heartbeat Thread");
   signal(SIGUSR1, kill_thread_signal_handler);
   while (send_heartbeat) {
-    fw_upload_DelayInMs(wakeup_local_param_config.heartbeat_timer_value * 100);
+    fw_upload_DelayInMs(
+        (uint32)(wakeup_local_param_config.heartbeat_timer_value * 100U));
     pthread_mutex_lock(&mtx_wakeup);
     packet = make_command(opcode, HCI_CMD_NXP_SUB_OCF_SIZE);
     if (packet) {
@@ -1100,10 +1100,10 @@ static void* send_heartbeat_thread(void* data) {
 *******************************************************************************/
 int8 hw_bt_send_wakeup_disable_raw(void) {
   uint16_t opcode;
-  int ret = -1;
+  int8 ret = -1;
   uint8_t* stream;
   uint8_t length;
-  if (enable_heartbeat_config == TRUE) {
+  if (enable_heartbeat_config == true) {
     uint8_t* packet;
     opcode = HCI_CMD_NXP_BLE_WAKEUP;
     packet = make_command_raw(opcode, HCI_CMD_NXP_SUB_OCF_SIZE, &length);
@@ -1127,9 +1127,9 @@ int8 hw_bt_send_wakeup_disable_raw(void) {
 *******************************************************************************/
 static int8 set_wakeup_uart_pull_down_config(void) {
   uint16_t opcode;
-  int ret = -1;
-  if (enable_heartbeat_config == TRUE &&
-      wakeup_enable_uart_low_config == TRUE) {
+  int8 ret = -1;
+  if ((enable_heartbeat_config == true) &&
+      (wakeup_enable_uart_low_config == true)) {
     HC_BT_HDR* packet;
     opcode = HCI_CMD_NXP_BLE_WAKEUP;
     packet = make_command(opcode, HCI_CMD_NXP_SUB_OCF_SIZE);
@@ -1153,7 +1153,7 @@ static int8 set_wakeup_gpio_config(void) {
   uint16_t opcode;
   int8 ret = -1;
   HC_BT_HDR* packet;
-  if ((enable_heartbeat_config == TRUE) &&
+  if ((enable_heartbeat_config == true) &&
       (wake_gpio_config < wakeup_key_num)) {
     opcode = HCI_CMD_NXP_BLE_WAKEUP;
     packet = make_command(
@@ -1190,7 +1190,7 @@ static int8 set_wakeup_adv_pattern(void) {
   uint16_t opcode;
   int8 ret = -1;
   HC_BT_HDR* packet;
-  if (enable_heartbeat_config == TRUE) {
+  if (enable_heartbeat_config == true) {
     opcode = HCI_CMD_NXP_BLE_WAKEUP;
     packet = make_command(opcode, HCI_CMD_NXP_SUB_OCF_SIZE +
                                       HCI_CMD_NXP_ADV_PATTERN_LENGTH_SIZE +
@@ -1229,7 +1229,7 @@ static int8 set_wakeup_scan_parameter(void) {
   uint16_t opcode;
   int8 ret = -1;
   HC_BT_HDR* packet;
-  if (enable_heartbeat_config == TRUE) {
+  if (enable_heartbeat_config == true) {
     opcode = HCI_CMD_NXP_BLE_WAKEUP;
     packet = make_command(
         opcode, HCI_CMD_NXP_SUB_OCF_SIZE + HCI_CMD_NXP_SCAN_PARAM_CONFIG_SIZE);
@@ -1264,8 +1264,8 @@ static int8 set_wakeup_scan_parameter(void) {
 *******************************************************************************/
 static int8 set_wakeup_local_parameter(void) {
   uint16_t opcode;
-  int ret = -1;
-  if (enable_heartbeat_config == TRUE) {
+  int8 ret = -1;
+  if (enable_heartbeat_config == true) {
     HC_BT_HDR* packet;
     opcode = HCI_CMD_NXP_BLE_WAKEUP;
     packet = make_command(
@@ -1318,7 +1318,7 @@ void wakeup_kill_heartbeat_thread(void) {
   int status = -1;
   VND_LOGD("Killing heartbeat thread");
   if (send_heartbeat) {
-    send_heartbeat = FALSE;
+    send_heartbeat = false;
     status = pthread_kill(p_headtbeat, SIGUSR1);
     fw_upload_DelayInMs(10);
   }
