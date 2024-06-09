@@ -78,6 +78,9 @@ endif
 ifeq ($(TARGET_PRODUCT), evk_8mq)
     include $(LOCAL_PATH)/conf/nxp/evk_8mq/Android.mk
 endif
+ifeq ($(TARGET_PRODUCT), maaxboard)
+    include $(LOCAL_PATH)/conf/nxp/maaxboard/Android.mk
+endif
 ifeq ($(TARGET_PRODUCT), evk_8mn)
     include $(LOCAL_PATH)/conf/nxp/evk_8mn/Android.mk
 endif
